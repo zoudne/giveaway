@@ -1,0 +1,10 @@
+# Coolify's Nixpacks image installs Node 22.11, and npm ci skips Vite's
+# Linux binding. Reinstall with optional packages, then serve the preview app.
+[phases.setup]
+nixPkgs = ["nodejs_22", "chromium"]
+
+[phases.install]
+cmds = ["npm install --include=dev --include=optional"]
+
+[start]
+cmd = "npm start"

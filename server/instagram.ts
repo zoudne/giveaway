@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { chromium, type Page } from 'playwright'
 import type { Plugin } from 'vite'
@@ -173,7 +174,30 @@ export function parsePostHtml(html: string, shortcode: string): {
   }
 }
 
+function linuxBrowser(): string | null {
+  if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH
+  for (const bin of ['chromium', 'chromium-browser', 'google-chrome-stable', 'google-chrome']) {
+    try {
+      const found = execFileSync('which', [bin], { encoding: 'utf8' }).trim()
+      if (found) return found
+    } catch {
+      // try the next installed browser
+    }
+  }
+  return null
+}
+
 async function launchBrowser() {
+  if (process.platform === 'linux') {
+    const executablePath = linuxBrowser()
+    if (executablePath) {
+      return chromium.launch({
+        executablePath,
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      })
+    }
+  }
   try {
     return await chromium.launch({ channel: 'msedge', headless: true })
   } catch {
