@@ -4,7 +4,10 @@
 nixPkgs = ["nodejs_22", "chromium"]
 
 [phases.install]
-cmds = ["npm install --include=dev --include=optional"]
+cmds = ["NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm install --include=dev --include=optional"]
+
+[phases.build]
+cmds = ["NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm run build"]
 
 [start]
 cmd = "npm start"
