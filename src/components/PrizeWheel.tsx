@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { playReveal, playSpin } from '../lib/ceremony.ts'
 
 const COLORS = ['#1f7a45', '#f4ead2', '#d7a441', '#143528', '#efe2c2', '#0e5c36']
 
@@ -11,6 +12,8 @@ type SpinRequest = {
 type Props = {
   names: string[]
   request: SpinRequest
+  sound: boolean
+  onProgress: (names: string[]) => void
   onDone: () => void
 }
 
@@ -48,13 +51,17 @@ function slicePath(index: number, total: number): string {
   return `M160 160 L${x1} ${y1} A${radius} ${radius} 0 ${large} 1 ${x2} ${y2} Z`
 }
 
-export function PrizeWheel({ names, request, onDone }: Props) {
-  const idle = names.length > 0 ? names.slice(0, 12) : ['السحب', 'الفائز', 'القرص', 'الجائزة']
+export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props) {
+  const idle = names.length > 0 ? names.slice(0, 12) : ['السعودية', 'الكويت', 'الفائز', '5 د.ك']
   const [slices, setSlices] = useState(idle)
   const [rotation, setRotation] = useState(0)
   const [duration, setDuration] = useState(0)
   const [revealed, setRevealed] = useState<string[]>([])
   const [live, setLive] = useState(false)
+  const soundOn = useRef(sound)
+  useEffect(() => {
+    soundOn.current = sound
+  }, [sound])
 
   useEffect(() => {
     if (request.id === 0) return
@@ -67,8 +74,11 @@ export function PrizeWheel({ names, request, onDone }: Props) {
     const sequence = request.targets
 
     void (async () => {
+      const landed: string[] = []
       setRevealed([])
+      onProgress([])
       setLive(true)
+      if (soundOn.current && !reduced) playSpin()
       for (const winner of sequence) {
         if (cancelled) return
         const built = buildSlices(pool.length > 0 ? pool : sequence, winner)
@@ -76,7 +86,7 @@ export function PrizeWheel({ names, request, onDone }: Props) {
         await sleep(50)
         if (cancelled) return
         const slice = 360 / built.slices.length
-        const jitter = (Math.random() - 0.5) * slice * 0.35
+        const jitter = (Math.random() - 0.5) * slice * 0.12
         const desired = -((built.index + 0.5) * slice + jitter)
         setDuration(turn)
         setRotation((current) => {
@@ -85,7 +95,10 @@ export function PrizeWheel({ names, request, onDone }: Props) {
         })
         await sleep(turn + 90)
         if (cancelled) return
-        setRevealed((current) => [...current, winner])
+        landed.push(winner)
+        setRevealed([...landed])
+        onProgress([...landed])
+        if (soundOn.current && !reduced) playReveal()
         await sleep(pause)
       }
       if (!cancelled) {
@@ -97,7 +110,7 @@ export function PrizeWheel({ names, request, onDone }: Props) {
     return () => {
       cancelled = true
     }
-  }, [onDone, request])
+  }, [onDone, onProgress, request])
 
   const shown = request.id === 0 ? idle : slices
   const count = Math.max(shown.length, 1)
@@ -105,9 +118,14 @@ export function PrizeWheel({ names, request, onDone }: Props) {
   return (
     <div className="wheel-wrap">
       <div className={`wheel-stage${live ? ' is-live' : ''}`} data-testid="prize-wheel">
-        <div className="pointer" aria-hidden="true" />
-        {Array.from({ length: 18 }, (_, index) => (
-          <i key={index} className="bulb" style={{ ['--a' as string]: `${index * 20}deg` }} />
+        <div className="pointer" aria-hidden="true">
+          <svg viewBox="0 0 36 48" width="36" height="48">
+            <path d="M18 48 3 16a15 15 0 1 1 30 0Z" fill="#f8e7c0" />
+            <circle cx="18" cy="14" r="4.5" fill="#8a5a16" />
+          </svg>
+        </div>
+        {Array.from({ length: 22 }, (_, index) => (
+          <i key={index} className="bulb" style={{ ['--a' as string]: `${index * (360 / 22)}deg` }} />
         ))}
         <div
           className="rotor"
@@ -152,15 +170,15 @@ export function PrizeWheel({ names, request, onDone }: Props) {
       </div>
       <p className="wheel-caption" data-testid="wheel-status" aria-live="polite">
         {live ? (
-          `القرص يدور على الفائز ${revealed.length + 1}`
+          `القرص يدور · الفائز ${Math.min(revealed.length + 1, request.targets.length)} من ${request.targets.length}`
         ) : revealed.length > 0 ? (
           <>
             توقف القرص عند <bdi dir="ltr">{revealed[revealed.length - 1]}</bdi>
           </>
         ) : names.length > 0 ? (
-          'القرص جاهز. أدره لاختيار الفائزين.'
+          'القرص جاهز. ابدأ السحب عندما يكتمل الجمهور.'
         ) : (
-          'يظهر المشاركون على القرص بعد اكتمال الشروط.'
+          'يظهر المشاركون على القرص بعد حفظ النتيجة.'
         )}
       </p>
     </div>

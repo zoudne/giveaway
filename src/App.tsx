@@ -3,6 +3,7 @@ import { DrawPanel } from './components/DrawPanel.tsx'
 import { EntryTable } from './components/EntryTable.tsx'
 import { ImportPanel } from './components/ImportPanel.tsx'
 import { ScoreBoard } from './components/ScoreBoard.tsx'
+import { armCeremony } from './lib/ceremony.ts'
 import { CONTEST } from './lib/contest.ts'
 import { formatScore, sameScore } from './lib/parse.ts'
 import { drawPool, pickWinners, prepareEntries } from './lib/prepare.ts'
@@ -13,6 +14,14 @@ export default function App() {
   const [data, setData] = useState<AppData>(() => loadData())
   const [notice, setNotice] = useState('')
   const [spinning, setSpinning] = useState(false)
+  const [stage, setStage] = useState(false)
+  const [sound, setSound] = useState(() => {
+    try {
+      return localStorage.getItem('giveaway-sound') !== 'off'
+    } catch {
+      return true
+    }
+  })
   const [spinRequest, setSpinRequest] = useState<{ id: number; names: string[]; targets: string[] }>({
     id: 0,
     names: [],
@@ -23,6 +32,22 @@ export default function App() {
   useEffect(() => {
     saveData(data)
   }, [data])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('giveaway-sound', sound ? 'on' : 'off')
+    } catch {
+      /* The draw still works if the browser blocks storage. */
+    }
+  }, [sound])
+
+  useEffect(() => {
+    function onFullscreen() {
+      if (!document.fullscreenElement) setStage(false)
+    }
+    document.addEventListener('fullscreenchange', onFullscreen)
+    return () => document.removeEventListener('fullscreenchange', onFullscreen)
+  }, [])
 
   const entries = useMemo(() => prepareEntries(data), [data])
   const eligible = useMemo(() => drawPool(entries, []), [entries])
@@ -74,6 +99,7 @@ export default function App() {
 
   function drawFresh() {
     if (spinning || eligible.length === 0) return
+    if (sound) armCeremony()
     const picked = pickWinners(eligible, data.winnerCount)
     pendingKeys.current = picked.map((entry) => entry.key)
     const targets = picked.map(entryLabel)
@@ -94,37 +120,96 @@ export default function App() {
     })
   }
 
+  const drawRef = useRef(drawFresh)
+  useEffect(() => {
+    drawRef.current = drawFresh
+  })
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.code !== 'Space') return
+      const target = event.target
+      if (target instanceof HTMLElement) {
+        const tag = target.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) return
+      }
+      event.preventDefault()
+      drawRef.current()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  async function toggleStage() {
+    const next = !stage
+    setStage(next)
+    try {
+      if (next) {
+        if (!document.fullscreenElement) await document.documentElement.requestFullscreen()
+      } else if (document.fullscreenElement) {
+        await document.exitFullscreen()
+      }
+    } catch {
+      /* Fullscreen can be denied; the stage layout still applies. */
+    }
+  }
+
+  const steps = [
+    { label: 'التعليقات', done: data.comments.length > 0, detail: data.comments.length > 0 ? String(data.comments.length) : 'الصق الرابط' },
+    {
+      label: 'النتيجة',
+      done: data.actual !== null,
+      detail: data.actual ? formatScore(data.actual) : 'بعد الصافرة',
+    },
+    {
+      label: 'السحب',
+      done: winners.length > 0,
+      detail: winners.length > 0 ? `${winners.length} فائزين` : 'القرص',
+    },
+  ]
+
   return (
-    <div className="page">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">قرص السحب</p>
-          <h1>
-            <span>{CONTEST.home}</span>
-            <span className="vs">×</span>
-            <span>{CONTEST.away}</span>
-          </h1>
-          <p className="lede">
-            {CONTEST.prize} لـ {data.winnerCount} فائزين. المقارنة تلقائية: يُستبعد كل توقع غير مطابق، ويبقى من كتب منشن{' '}
-            {data.requiredMentions} أشخاص.
+    <div className={`page${stage ? ' is-stage' : ''}${data.comments.length > 0 ? ' has-show' : ''}`}>
+      <header className="mast">
+        <div className="mast-top">
+          <p className="brand">
+            <i className="live-dot" aria-hidden="true" />
+            سحب مباشر
           </p>
+          <div className="mast-actions no-print">
+            <button type="button" className="stage-btn" aria-pressed={stage} onClick={() => void toggleStage()}>
+              {stage ? 'إنهاء العرض' : 'شاشة العرض'}
+            </button>
+            <button type="button" className="ghost" aria-pressed={sound} onClick={() => setSound((current) => !current)}>
+              {sound ? 'الصوت يعمل' : 'الصوت متوقف'}
+            </button>
+            <a href={CONTEST.postUrl} target="_blank" rel="noreferrer">
+              المنشور
+            </a>
+            <button
+              type="button"
+              className="ghost operator"
+              onClick={() => {
+                if (!window.confirm('تمسح النتيجة والتعليقات والفائزين من هذا المتصفح؟')) return
+                setData(EMPTY_DATA)
+                setNotice('تم مسح بيانات المسابقة من هذا المتصفح.')
+              }}
+            >
+              مسح
+            </button>
+          </div>
         </div>
-        <div className="hero-side no-print">
-          <a href={CONTEST.postUrl} target="_blank" rel="noreferrer">
-            فتح المنشور
-          </a>
-          <button
-            type="button"
-            className="ghost"
-            onClick={() => {
-              if (!window.confirm('تمسح النتيجة والتعليقات والفائزين من هذا المتصفح؟')) return
-              setData(EMPTY_DATA)
-              setNotice('تم مسح بيانات المسابقة من هذا المتصفح.')
-            }}
-          >
-            مسح البيانات
-          </button>
-        </div>
+        <p className="prize-pill">
+          {CONTEST.prize} · {data.winnerCount} فائزين
+        </p>
+        <h1>
+          <span>{CONTEST.home}</span>
+          <span className="vs">×</span>
+          <span>{CONTEST.away}</span>
+        </h1>
+        <p className="lede">
+          يفوز من طابق النتيجة وكتب منشن {data.requiredMentions} أشخاص. كل توقع مختلف يخرج من القرص تلقائيًا.
+        </p>
       </header>
 
       {notice ? (
@@ -133,6 +218,20 @@ export default function App() {
         </p>
       ) : null}
 
+      <ol className="steps operator no-print">
+        {steps.map((step, index) => (
+          <li key={step.label} className={step.done ? 'done' : undefined}>
+            <span>{index + 1}</span>
+            <div>
+              <strong>{step.label}</strong>
+              <small>
+                <bdi>{step.detail}</bdi>
+              </small>
+            </div>
+          </li>
+        ))}
+      </ol>
+
       <ScoreBoard
         key={data.actual ? `${data.actual.saudi}-${data.actual.kuwait}` : 'empty'}
         actual={data.actual}
@@ -140,14 +239,18 @@ export default function App() {
         onSave={saveActual}
       />
 
-      <div className="no-print">
+      <div className="no-print operator control-room">
         <ImportPanel
           handle={data.handle}
           requiredMentions={data.requiredMentions}
+          winnerCount={data.winnerCount}
           commentCount={data.comments.length}
           onHandle={(handle) => setData((current) => ({ ...current, handle }))}
           onRequiredMentions={(requiredMentions) =>
             setData((current) => ({ ...current, requiredMentions, winnerKeys: [], replacedKeys: [] }))
+          }
+          onWinnerCount={(winnerCount) =>
+            setData((current) => ({ ...current, winnerCount, winnerKeys: [], replacedKeys: [] }))
           }
           onComments={setComments}
           onNotice={setNotice}
@@ -166,16 +269,14 @@ export default function App() {
         poolCount={eligible.length}
         winners={winners}
         spinning={spinning}
+        sound={sound}
         spinRequest={spinRequest}
         poolNames={eligible.map(entryLabel)}
         onSpinDone={finishSpin}
-        onWinnerCount={(winnerCount) =>
-          setData((current) => ({ ...current, winnerCount, winnerKeys: [], replacedKeys: [] }))
-        }
         onDraw={drawFresh}
       />
 
-      <div className="no-print">
+      <div className="no-print operator review">
         <EntryTable
           entries={entries}
           onExclude={(key) =>

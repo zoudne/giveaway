@@ -21,9 +21,11 @@ type FetchResult = {
 type Props = {
   handle: string
   requiredMentions: number
+  winnerCount: number
   commentCount: number
   onHandle: (value: string) => void
   onRequiredMentions: (value: number) => void
+  onWinnerCount: (value: number) => void
   onComments: (comments: RawComment[], mode: 'replace' | 'append') => void
   onNotice: (message: string) => void
 }
@@ -31,9 +33,11 @@ type Props = {
 export function ImportPanel({
   handle,
   requiredMentions,
+  winnerCount,
   commentCount,
   onHandle,
   onRequiredMentions,
+  onWinnerCount,
   onComments,
   onNotice,
 }: Props) {
@@ -103,8 +107,8 @@ export function ImportPanel({
 
   return (
     <section className="panel">
-      <div className="section-kicker">المشاركون</div>
-      <h2>الصق رابط المنشور</h2>
+      <div className="section-kicker">الإعداد</div>
+      <h2>اجلب تعليقات المنشور</h2>
       <p className="hint">انسخ رابط المسابقة. تُجلب التعليقات مباشرة، وتُقارن التوقعات بالنتيجة بعد حفظها.</p>
       <form className="link-form" onSubmit={(event) => void fetchComments(event)}>
         <label>
@@ -142,6 +146,17 @@ export function ImportPanel({
             max={10}
             value={requiredMentions}
             onChange={(event) => onRequiredMentions(Math.min(10, Math.max(1, Number(event.target.value) || 1)))}
+          />
+        </label>
+        <label>
+          عدد الفائزين
+          <input
+            data-testid="winner-count"
+            type="number"
+            min={1}
+            max={20}
+            value={winnerCount}
+            onChange={(event) => onWinnerCount(Math.min(20, Math.max(1, Number(event.target.value) || 1)))}
           />
         </label>
       </div>

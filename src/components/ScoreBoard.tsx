@@ -13,6 +13,7 @@ type Props = {
 export function ScoreBoard({ actual, correctCount, onSave }: Props) {
   const [saudi, setSaudi] = useState(actual ? String(actual.saudi) : '')
   const [kuwait, setKuwait] = useState(actual ? String(actual.kuwait) : '')
+  const [editing, setEditing] = useState(actual === null)
 
   function save(event: FormEvent) {
     event.preventDefault()
@@ -31,13 +32,28 @@ export function ScoreBoard({ actual, correctCount, onSave }: Props) {
     (!Number.isInteger(Number(saudi)) || !Number.isInteger(Number(kuwait)))
 
   return (
-    <section className="scoreboard">
-      <div className="section-kicker">النتيجة الفعلية</div>
-      <h2>بعد صافرة النهاية، ثبّت نتيجة المباراة</h2>
-      <form onSubmit={save}>
+    <section className={`scoreboard${actual ? ' has-score' : ''}`}>
+      <div className="score-head">
+        <div>
+          <div className="section-kicker">النتيجة الرسمية</div>
+          <h2>{actual && !editing ? 'النتيجة التي يُسحب عليها' : 'بعد صافرة النهاية، ثبّت النتيجة'}</h2>
+        </div>
+        {actual ? (
+          <p className="locked-score">
+            <bdi dir="ltr">{formatScore(actual)}</bdi>
+            <span>محفوظة</span>
+          </p>
+        ) : (
+          <p className="waiting-pill">بانتظار النتيجة</p>
+        )}
+      </div>
+      <form className="score-form" onSubmit={save} hidden={!editing}>
         <div className="score-row">
           <label>
-            <span>{CONTEST.home}</span>
+            <span className="team">
+              <i className="flag flag-ksa" aria-hidden="true" />
+              {CONTEST.home}
+            </span>
             <input
               data-testid="score-saudi"
               inputMode="numeric"
@@ -50,7 +66,10 @@ export function ScoreBoard({ actual, correctCount, onSave }: Props) {
           </label>
           <b className="score-sep">×</b>
           <label>
-            <span>{CONTEST.away}</span>
+            <span className="team">
+              <i className="flag flag-kwt" aria-hidden="true" />
+              {CONTEST.away}
+            </span>
             <input
               data-testid="score-kuwait"
               inputMode="numeric"
@@ -74,6 +93,13 @@ export function ScoreBoard({ actual, correctCount, onSave }: Props) {
         </div>
         {invalid ? <p className="form-error">اكتب رقمين صحيحين من 0 إلى 20.</p> : null}
       </form>
+      {actual && !editing ? (
+        <div className="score-actions operator">
+          <button type="button" className="ghost" onClick={() => setEditing(true)}>
+            تعديل النتيجة
+          </button>
+        </div>
+      ) : null}
       <p className="score-status" data-testid="score-status">
         {actual ? (
           <>

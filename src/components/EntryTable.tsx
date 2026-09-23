@@ -99,7 +99,7 @@ export function EntryTable({ entries, onExclude, onOverride }: Props) {
               slice.map((entry) => (
                 <tr key={entry.key} data-testid="entry-row" className={entry.excluded ? 'is-excluded' : undefined}>
                   <td data-label="المشارك">
-                    <strong>{entry.comment.missingUser ? 'بدون اسم' : `@${entry.comment.username}`}</strong>
+                    <strong dir="ltr">{entry.comment.missingUser ? 'بدون اسم' : `@${entry.comment.username}`}</strong>
                     {entry.others.length > 0 ? <small>{entry.others.length + 1} تعليقات، اعتُمد الأكمل</small> : null}
                   </td>
                   <td data-label="التوقع">
@@ -122,19 +122,19 @@ export function EntryTable({ entries, onExclude, onOverride }: Props) {
                       />
                     ) : (
                       <button type="button" className="text-btn" onClick={() => setEditing(entry.key)}>
-                        {entry.prediction ? formatScore(entry.prediction) : 'لا يوجد توقع'}
+                        {entry.prediction ? <bdi dir="ltr">{formatScore(entry.prediction)}</bdi> : 'لا يوجد توقع'}
                       </button>
                     )}
                   </td>
                   <td data-label="المنشن">
                     <b>{entry.mentions.length}</b>
-                    <small>{entry.mentions.map((name) => `@${name}`).join(' ')}</small>
+                    <small dir="ltr">{entry.mentions.map((name) => `@${name}`).join(' ')}</small>
                   </td>
                   <td data-label="الحالة">
                     <span className={`badge ${badgeClass(entry)}`}>{statusLabel(entry)}</span>
                   </td>
                   <td data-label="التعليق">
-                    <p className="comment-text">{entry.comment.text}</p>
+                    <p className="comment-text" dir="auto">{entry.comment.text}</p>
                     {entry.others.length > 0 ? (
                       <details>
                         <summary>تعليقات أخرى</summary>
