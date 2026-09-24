@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { CONTEST } from '../lib/contest.ts'
+import { CONTEST, POSTS } from '../lib/contest.ts'
 import { assignOrder } from '../lib/importComments.ts'
 import { SAMPLE_COMMENTS } from '../lib/sample.ts'
 import type { RawComment } from '../lib/types.ts'
@@ -18,11 +18,21 @@ type FetchResult = {
   error?: string
 }
 
+function deadlineInput(value: string): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const pad = (part: number) => String(part).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
 type Props = {
   handle: string
   requiredMentions: number
   winnerCount: number
   commentCount: number
+  commentDeadline: string
+  onDeadline: (value: string) => void
   onHandle: (value: string) => void
   onRequiredMentions: (value: number) => void
   onWinnerCount: (value: number) => void
@@ -35,6 +45,8 @@ export function ImportPanel({
   requiredMentions,
   winnerCount,
   commentCount,
+  commentDeadline,
+  onDeadline,
   onHandle,
   onRequiredMentions,
   onWinnerCount,
@@ -46,19 +58,20 @@ export function ImportPanel({
   const [manualUser, setManualUser] = useState('')
   const [manualText, setManualText] = useState('')
 
-  async function fetchComments(event: FormEvent) {
-    event.preventDefault()
-    if (!url.trim()) {
+  async function fetchUrl(nextUrl: string) {
+    const target = nextUrl.trim()
+    if (!target) {
       onNotice('الصق رابط المنشور.')
       return
     }
+    setUrl(target)
     setLoading(true)
     onNotice('جارٍ جلب التعليقات.')
     try {
       const response = await fetch('/api/instagram/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: target }),
       })
       const body = (await response.json()) as FetchResult
       if (!response.ok) throw new Error(body.error || 'تعذر جلب التعليقات')
@@ -109,8 +122,27 @@ export function ImportPanel({
     <section className="panel">
       <div className="section-kicker">الإعداد</div>
       <h2>اجلب تعليقات المنشور</h2>
-      <p className="hint">انسخ رابط المسابقة. تُجلب التعليقات مباشرة، وتُقارن التوقعات بالنتيجة بعد حفظها.</p>
-      <form className="link-form" onSubmit={(event) => void fetchComments(event)}>
+      <p className="hint">اختر المنشور أو الصق رابطًا آخر. التعليق بعد آخر موعد لا يدخل السحب.</p>
+      <div className="post-picks">
+        {POSTS.map((post) => (
+          <button
+            key={post.url}
+            type="button"
+            className={url === post.url ? 'chip on' : 'chip'}
+            disabled={loading}
+            onClick={() => void fetchUrl(post.url)}
+          >
+            {post.name}
+          </button>
+        ))}
+      </div>
+      <form
+        className="link-form"
+        onSubmit={(event) => {
+          event.preventDefault()
+          void fetchUrl(url)
+        }}
+      >
         <label>
           رابط المنشور
           <input
@@ -146,6 +178,15 @@ export function ImportPanel({
             max={10}
             value={requiredMentions}
             onChange={(event) => onRequiredMentions(Math.min(10, Math.max(1, Number(event.target.value) || 1)))}
+          />
+        </label>
+        <label>
+          آخر موعد للتعليق
+          <input
+            data-testid="comment-deadline"
+            type="datetime-local"
+            value={deadlineInput(commentDeadline)}
+            onChange={(event) => onDeadline(event.target.value ? new Date(event.target.value).toISOString() : '')}
           />
         </label>
         <label>

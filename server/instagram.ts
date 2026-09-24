@@ -272,7 +272,7 @@ async function loadNextPage(page: Page, payload: {
   return readComments(connection)
 }
 
-async function fetchPost(url: string): Promise<{
+export async function fetchPost(url: string): Promise<{
   accountUsername: string
   commentsCount: number | null
   permalink: string
@@ -299,6 +299,7 @@ async function fetchPost(url: string): Promise<{
     let cursor = parsed.batch.cursor
     let hasNext = parsed.batch.hasNext
     let pages = 0
+    let stop = hasNext ? '' : 'first page reported no next page'
     while (hasNext && cursor && pages < 40 && comments.length < 5000) {
       pages += 1
       const batch = await loadNextPage(page, {
@@ -309,9 +310,20 @@ async function fetchPost(url: string): Promise<{
       })
       const before = comments.length
       pushAll(batch)
-      if (comments.length === before || batch.cursor === cursor) break
+      if (comments.length === before) {
+        stop = `page ${pages} added no new comments`
+        break
+      }
+      if (batch.cursor === cursor) {
+        stop = `page ${pages} repeated the same cursor`
+        break
+      }
       cursor = batch.cursor
       hasNext = batch.hasNext
+      if (!hasNext) stop = `page ${pages} was the last page`
+    }
+    if (process.env.DEBUG_COMMENTS) {
+      console.error(`pages ${pages} stop: ${stop || 'limit'} comments ${comments.length}`)
     }
 
     return {

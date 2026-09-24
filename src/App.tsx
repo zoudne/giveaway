@@ -245,6 +245,10 @@ export default function App() {
           requiredMentions={data.requiredMentions}
           winnerCount={data.winnerCount}
           commentCount={data.comments.length}
+          commentDeadline={data.commentDeadline}
+          onDeadline={(commentDeadline) =>
+            setData((current) => ({ ...current, commentDeadline, winnerKeys: [], replacedKeys: [] }))
+          }
           onHandle={(handle) => setData((current) => ({ ...current, handle }))}
           onRequiredMentions={(requiredMentions) =>
             setData((current) => ({ ...current, requiredMentions, winnerKeys: [], replacedKeys: [] }))

@@ -461,6 +461,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
   font-size: 0.82rem;
 }
 .muted-stamp { background: #8d4a3c; }
+.post-picks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .filters { margin-top: 14px; }
 .filters { width: 100%; }
 .filters input { flex: 1 1 220px; }

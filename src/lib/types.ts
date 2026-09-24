@@ -23,6 +23,7 @@ export type AppData = {
   handle: string
   requiredMentions: number
   winnerCount: number
+  commentDeadline: string
   requireFollow: boolean
   scope: Scope
   comments: RawComment[]
@@ -38,6 +39,7 @@ export const EMPTY_DATA: AppData = {
   handle: '',
   requiredMentions: 3,
   winnerCount: 5,
+  commentDeadline: '',
   requireFollow: false,
   scope: 'qualified',
   comments: [],

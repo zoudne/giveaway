@@ -8,6 +8,7 @@ export type ViewEntry = {
   prediction: Score | null
   mentions: string[]
   mentionsOk: boolean
+  onTime: boolean
   rulesMet: boolean
   correct: boolean | null
   excluded: boolean
@@ -50,7 +51,18 @@ function groupKey(comment: RawComment): string {
   return `user:${comment.username.trim().toLowerCase()}`
 }
 
+export function commentOnTime(comment: RawComment, deadline: string): boolean {
+  if (!deadline) return true
+  const limit = Date.parse(deadline)
+  const time = comment.timestamp ? Date.parse(comment.timestamp) : Number.NaN
+  if (Number.isNaN(limit) || Number.isNaN(time)) return false
+  return time < limit
+}
+
 function better(a: RawComment, b: RawComment, data: AppData): RawComment {
+  const aOn = commentOnTime(a, data.commentDeadline)
+  const bOn = commentOnTime(b, data.commentDeadline)
+  if (aOn !== bOn) return aOn ? a : b
   const qa = quality(a, data)
   const qb = quality(b, data)
   if (qa !== qb) return qa > qb ? a : b
@@ -78,9 +90,10 @@ export function prepareEntries(data: AppData): ViewEntry[] {
     const mentions = extractMentions(comment.text, excludeNames(comment, data.handle))
     const excluded = data.excluded[key] === true
     const mentionsOk = mentions.length >= data.requiredMentions
+    const onTime = commentOnTime(comment, data.commentDeadline)
     let correct: boolean | null = null
     if (data.actual && prediction) correct = sameScore(prediction, data.actual)
-    const rulesMet = mentionsOk && correct === true && !excluded
+    const rulesMet = mentionsOk && correct === true && !excluded && onTime
     return {
       key,
       comment,
@@ -88,6 +101,7 @@ export function prepareEntries(data: AppData): ViewEntry[] {
       prediction,
       mentions,
       mentionsOk,
+      onTime,
       rulesMet,
       correct,
       excluded,

@@ -33,6 +33,7 @@ export function loadData(): AppData {
           : 3,
       winnerCount:
         typeof record.winnerCount === 'number' && record.winnerCount > 0 ? record.winnerCount : 5,
+      commentDeadline: typeof record.commentDeadline === 'string' ? record.commentDeadline : '',
       requireFollow: record.requireFollow === true,
       scope,
       comments: Array.isArray(record.comments) ? record.comments.filter(isComment) : [],

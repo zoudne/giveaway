@@ -180,6 +180,7 @@ function rank(entry: ViewEntry): number {
 
 function statusLabel(entry: ViewEntry): string {
   if (entry.excluded) return 'مستبعد'
+  if (!entry.onTime) return 'بعد الموعد'
   if (!entry.prediction) return 'بدون توقع'
   if (!entry.mentionsOk) return 'منشن ناقص'
   if (entry.correct === null) return 'بانتظار النتيجة'
@@ -189,7 +190,7 @@ function statusLabel(entry: ViewEntry): string {
 
 function badgeClass(entry: ViewEntry): string {
   if (entry.rulesMet) return 'good'
-  if (entry.excluded || !entry.prediction || !entry.mentionsOk || entry.correct === false) return 'bad'
+  if (entry.excluded || !entry.onTime || !entry.prediction || !entry.mentionsOk || entry.correct === false) return 'bad'
   return 'ok'
 }
 
