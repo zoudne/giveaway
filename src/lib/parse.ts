@@ -83,11 +83,16 @@ function numberHits(text: string): Hit[] {
 
 function findPair(text: string): Score | null {
   const re =
-    /(?<![\p{L}\p{N}])(صفر|\d{1,2})(?![\p{L}\p{N}])\s*[-:xX×/–—,،]\s*(صفر|\d{1,2})(?![\p{L}\p{N}])/u
+    /(?<![\p{L}\p{N}])(صفر|\d{1,2})(?![\p{L}\p{N}])\s*([-:xX×/–—,،])\s*(صفر|\d{1,2})(?![\p{L}\p{N}])/u
   const match = re.exec(text)
-  if (!match) return null
-  const saudi = match[1] === 'صفر' ? 0 : Number(match[1])
-  const kuwait = match[2] === 'صفر' ? 0 : Number(match[2])
+  if (!match || !match[1] || !match[3]) return null
+  let saudi = match[1] === 'صفر' ? 0 : Number(match[1])
+  let kuwait = match[3] === 'صفر' ? 0 : Number(match[3])
+  if (match[2] === '/' && /[\u0600-\u06FF]/.test(text)) {
+    const shownFirst = saudi
+    saudi = kuwait
+    kuwait = shownFirst
+  }
   return acceptScore(saudi, kuwait)
 }
 

@@ -300,7 +300,7 @@ export async function fetchPost(url: string): Promise<{
     let hasNext = parsed.batch.hasNext
     let pages = 0
     let stop = hasNext ? '' : 'first page reported no next page'
-    while (hasNext && cursor && pages < 40 && comments.length < 5000) {
+    while (hasNext && cursor && pages < 80 && comments.length < 5000) {
       pages += 1
       const batch = await loadNextPage(page, {
         mediaId: parsed.mediaId,
