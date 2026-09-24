@@ -17,16 +17,22 @@ type Props = {
   onDone: () => void
 }
 
-function shortName(name: string): string {
+function labelFit(count: number): { maxChars: number; fontSize: number; y: number } {
+  if (count <= 8) return { maxChars: 12, fontSize: 16, y: 72 }
+  if (count <= 16) return { maxChars: 10, fontSize: 12, y: 68 }
+  if (count <= 24) return { maxChars: 8, fontSize: 9, y: 62 }
+  return { maxChars: 6, fontSize: 7, y: 54 }
+}
+
+function shortName(name: string, maxChars: number): string {
   const at = name.startsWith('@')
   const body = at ? name.slice(1) : name
-  const trimmed = body.length > 12 ? `${body.slice(0, 11)}…` : body
+  const trimmed = body.length > maxChars ? `${body.slice(0, maxChars - 1)}…` : body
   return at ? `@${trimmed}` : trimmed
 }
 
 function buildSlices(pool: string[], winner: string): { slices: string[]; index: number } {
-  const others = pool.filter((name) => name !== winner)
-  const picked = others.slice(0, 11)
+  const picked = pool.filter((name) => name !== winner)
   for (let i = picked.length - 1; i > 0; i -= 1) {
     const swap = Math.floor(Math.random() * (i + 1))
     const current = picked[i]
@@ -52,7 +58,7 @@ function slicePath(index: number, total: number): string {
 }
 
 export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props) {
-  const idle = names.length > 0 ? names.slice(0, 12) : ['السعودية', 'الكويت', 'الفائز', '5 د.ك']
+  const idle = names.length > 0 ? names : ['السعودية', 'الكويت', 'الفائز', 'السحب']
   const [slices, setSlices] = useState(idle)
   const [rotation, setRotation] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -114,6 +120,7 @@ export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props)
 
   const shown = request.id === 0 ? idle : slices
   const count = Math.max(shown.length, 1)
+  const fit = labelFit(count)
 
   return (
     <div className="wheel-wrap">
@@ -146,16 +153,16 @@ export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props)
                   <g transform={`rotate(${angle} 160 160)`}>
                     <text
                       x="160"
-                      y="72"
+                      y={fit.y}
                       textAnchor="middle"
                       direction="ltr"
                       fill={ink}
-                      fontSize={count > 8 ? 13 : 16}
+                      fontSize={fit.fontSize}
                       fontWeight="700"
-                      fontFamily="IBM Plex Sans Arabic, Segoe UI, Tahoma, sans-serif"
-                      transform={flip ? 'rotate(90 160 72)' : 'rotate(-90 160 72)'}
+                      fontFamily="IBM Plex Sans, Segoe UI, Tahoma, sans-serif"
+                      transform={flip ? `rotate(90 160 ${fit.y})` : `rotate(-90 160 ${fit.y})`}
                     >
-                      {shortName(name)}
+                      {shortName(name, fit.maxChars)}
                     </text>
                   </g>
                 </g>
