@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { CONTEST, POSTS } from '../lib/contest.ts'
+import { CONTEST, KLARAIG_DRAW, POSTS } from '../lib/contest.ts'
 import { assignOrder } from '../lib/importComments.ts'
 import { SAMPLE_COMMENTS } from '../lib/sample.ts'
 import type { RawComment } from '../lib/types.ts'
@@ -37,6 +37,7 @@ type Props = {
   onRequiredMentions: (value: number) => void
   onWinnerCount: (value: number) => void
   onComments: (comments: RawComment[], mode: 'replace' | 'append') => void
+  onKlaraigDraw: () => void
   onNotice: (message: string) => void
 }
 
@@ -51,6 +52,7 @@ export function ImportPanel({
   onRequiredMentions,
   onWinnerCount,
   onComments,
+  onKlaraigDraw,
   onNotice,
 }: Props) {
   const [url, setUrl] = useState(CONTEST.postUrl)
@@ -135,6 +137,9 @@ export function ImportPanel({
             {post.name}
           </button>
         ))}
+        <button type="button" className="chip" data-testid="klaraig-shortlist" onClick={onKlaraigDraw}>
+          سحب كلاريج · {KLARAIG_DRAW.names.length}
+        </button>
       </div>
       <form
         className="link-form"

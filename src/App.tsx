@@ -4,7 +4,7 @@ import { EntryTable } from './components/EntryTable.tsx'
 import { ImportPanel } from './components/ImportPanel.tsx'
 import { ScoreBoard } from './components/ScoreBoard.tsx'
 import { armCeremony } from './lib/ceremony.ts'
-import { CONTEST } from './lib/contest.ts'
+import { CONTEST, KLARAIG_DRAW } from './lib/contest.ts'
 import { formatScore, sameScore } from './lib/parse.ts'
 import { drawPool, pickWinners, prepareEntries } from './lib/prepare.ts'
 import { loadData, saveData } from './lib/storage.ts'
@@ -95,6 +95,28 @@ export default function App() {
       }
       return { ...current, comments, winnerKeys: [], replacedKeys: [] }
     })
+  }
+
+  function loadKlaraigDraw() {
+    const comments: RawComment[] = KLARAIG_DRAW.names.map((entry, order) => ({
+      id: `klaraig-${entry.username}`,
+      username: entry.username,
+      text: entry.text,
+      order,
+      missingUser: false,
+    }))
+    setData((current) => ({
+      ...current,
+      actual: { saudi: 1, kuwait: 0 },
+      handle: KLARAIG_DRAW.handle,
+      commentDeadline: '',
+      comments,
+      excluded: {},
+      overrides: {},
+      winnerKeys: [],
+      replacedKeys: [],
+    }))
+    setNotice(`سحب كلاريج جاهز على ${comments.length} أسماء فقط. النتيجة ١–٠.`)
   }
 
   function drawFresh() {
@@ -257,6 +279,7 @@ export default function App() {
             setData((current) => ({ ...current, winnerCount, winnerKeys: [], replacedKeys: [] }))
           }
           onComments={setComments}
+          onKlaraigDraw={loadKlaraigDraw}
           onNotice={setNotice}
         />
       </div>
