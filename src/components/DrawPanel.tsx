@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { PrizeWheel } from './PrizeWheel.tsx'
 import { Confetti } from './Confetti.tsx'
 import { announcement } from '../lib/announce.ts'
-import { CONTEST } from '../lib/contest.ts'
 import { formatScore } from '../lib/parse.ts'
 import type { ViewEntry } from '../lib/prepare.ts'
 import type { AppData } from '../lib/types.ts'
@@ -75,7 +74,7 @@ export function DrawPanel({
       <Confetti active={celebrate} />
       <div className="section-kicker">السحب</div>
       <h2>
-        {data.winnerCount} فائزين · {CONTEST.prize}
+        {data.winnerCount} فائزين
       </h2>
       <div className="draw-layout">
         <PrizeWheel names={poolNames} request={spinRequest} sound={sound} onProgress={onProgress} onDone={onSpinDone} />

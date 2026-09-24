@@ -7,7 +7,7 @@ export function announcement(actual: Score | null, winners: ViewEntry[]): string
   const lines = [
     `نتيجة ${CONTEST.home} × ${CONTEST.away}: ${actual ? formatScore(actual) : 'لم تُدخل بعد'}`,
     '',
-    `الفائزون ب${CONTEST.prize}:`,
+    'الفائزون:',
     ...winners.map((winner, index) => {
       const name = winner.comment.missingUser ? 'مشارك بدون اسم' : `@${winner.comment.username}`
       const prediction = winner.prediction ? formatScore(winner.prediction) : 'بدون توقع'

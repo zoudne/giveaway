@@ -200,7 +200,7 @@ export default function App() {
           </div>
         </div>
         <p className="prize-pill">
-          {CONTEST.prize} · {data.winnerCount} فائزين
+          {data.winnerCount} فائزين
         </p>
         <h1>
           <span>{CONTEST.home}</span>
