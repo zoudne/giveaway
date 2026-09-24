@@ -109,6 +109,7 @@ export default function App() {
       ...current,
       actual: { saudi: 1, kuwait: 0 },
       handle: KLARAIG_DRAW.handle,
+      requiredMentions: 2,
       commentDeadline: '',
       comments,
       excluded: {},

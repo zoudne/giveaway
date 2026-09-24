@@ -20,6 +20,7 @@ export const KLARAIG_DRAW = {
     { username: 'sn2_5s', text: '@abrar28159 @swsw46137 @brr.1985 السعوديه 1 الكويت 0' },
     { username: 'galia.ash.3', text: 'السعودية 0/1 @om_naif_89 @7io_10z @om_naif__89' },
     { username: 'emleen22', text: 'السعودية 1_0 @3laashaher @karamalaa2552017 @roro2010_123' },
+    { username: 'hali1_995', text: '🔥@smra_00_s @ee___41 السعودية ٠/1' },
     { username: 'dodo_q8k', text: 'السعودية ٠/١ @hodh.od82 @elvaieu @remo_rem00000' },
     { username: 'latifa18616', text: 'اتوقع فوز السعوديه ١-٠ للكويت @om_3bdallh99 @om___90_m @om_esan3' },
     { username: 'f6oom_16', text: '@fatfat__98 @5oo5a90 @shmmriah_97 السعوديه ٠/١' },
