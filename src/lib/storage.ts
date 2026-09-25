@@ -28,7 +28,7 @@ export function loadData(): AppData {
       actual: isScore(record.actual) ? record.actual : null,
       handle: typeof record.handle === 'string' ? record.handle : '',
       requiredMentions:
-        typeof record.requiredMentions === 'number' && record.requiredMentions > 0
+        typeof record.requiredMentions === 'number' && record.requiredMentions >= 0
           ? record.requiredMentions
           : 3,
       winnerCount:

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { NameReel } from './NameReel.tsx'
+import { PrizeWheel } from './PrizeWheel.tsx'
 import { Confetti } from './Confetti.tsx'
 import { announcement } from '../lib/announce.ts'
 import { formatScore } from '../lib/parse.ts'
@@ -77,7 +77,7 @@ export function DrawPanel({
         {data.winnerCount} فائزين
       </h2>
       <div className="draw-layout">
-        <NameReel names={poolNames} request={spinRequest} sound={sound} onProgress={onProgress} onDone={onSpinDone} />
+        <PrizeWheel names={poolNames} request={spinRequest} sound={sound} onProgress={onProgress} onDone={onSpinDone} />
         <div className="draw-side">
       <button data-testid="draw-button" type="button" className={`draw-btn no-print${spinning ? ' is-hot' : ''}`} disabled={spinning || poolCount === 0} onClick={onDraw}>
         {spinning ? 'السحب جارٍ' : waitingForScore ? 'احفظ النتيجة أولًا' : poolCount === 0 ? 'بانتظار المشاركين' : winners.length > 0 ? `إعادة السحب · ${Math.min(data.winnerCount, poolCount)} من ${poolCount}` : `ابدأ السحب · ${Math.min(data.winnerCount, poolCount)} من ${poolCount}`}

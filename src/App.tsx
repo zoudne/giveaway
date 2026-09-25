@@ -4,7 +4,7 @@ import { EntryTable } from './components/EntryTable.tsx'
 import { ImportPanel } from './components/ImportPanel.tsx'
 import { ScoreBoard } from './components/ScoreBoard.tsx'
 import { armCeremony } from './lib/ceremony.ts'
-import { CONTEST, KLARAIG_DRAW, QUIDER_DRAW } from './lib/contest.ts'
+import { ARTCAKE_DRAW, CONTEST, KLARAIG_DRAW, QUIDER_DRAW } from './lib/contest.ts'
 import { formatScore, parseScore, sameScore } from './lib/parse.ts'
 import { drawPool, pickWinners, prepareEntries } from './lib/prepare.ts'
 import { loadData, saveData } from './lib/storage.ts'
@@ -95,6 +95,34 @@ export default function App() {
       }
       return { ...current, comments, winnerKeys: [], replacedKeys: [] }
     })
+  }
+
+  function loadArtcakeDraw() {
+    const comments: RawComment[] = ARTCAKE_DRAW.names.map((entry, order) => ({
+      id: `artcake-${entry.username}`,
+      username: entry.username,
+      text: entry.text,
+      order,
+      missingUser: false,
+    }))
+    const overrides: AppData['overrides'] = {}
+    for (const comment of comments) {
+      const score = parseScore(comment.text)
+      if (!score || score.saudi !== 2 || score.kuwait !== 0) overrides[comment.id] = { saudi: 2, kuwait: 0 }
+    }
+    setData((current) => ({
+      ...current,
+      actual: { saudi: 2, kuwait: 0 },
+      handle: ARTCAKE_DRAW.handle,
+      requiredMentions: 0,
+      commentDeadline: '',
+      comments,
+      excluded: {},
+      overrides,
+      winnerKeys: [],
+      replacedKeys: [],
+    }))
+    setNotice(`سحب آرت كيك جاهز على ${comments.length} أسماء فقط. النتيجة ٢–٠.`)
   }
 
   function loadKlaraigDraw() {
@@ -308,6 +336,7 @@ export default function App() {
             setData((current) => ({ ...current, winnerCount, winnerKeys: [], replacedKeys: [] }))
           }
           onComments={setComments}
+          onArtcakeDraw={loadArtcakeDraw}
           onKlaraigDraw={loadKlaraigDraw}
           onQuiderDraw={loadQuiderDraw}
           onNotice={setNotice}

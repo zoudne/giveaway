@@ -11,6 +11,25 @@ export const POSTS = [
   { name: 'قويدر', url: 'https://www.instagram.com/p/DdoD5MOod_r/' },
 ]
 
+export const ARTCAKE_DRAW = {
+  handle: 'artcake1',
+  url: 'https://www.instagram.com/p/DdqYqS2I9wb/',
+  names: [
+    { username: 'abusalem_kheed', text: 'قطر 0/2 @aldhahi.a.9s9 @alkhalah.meznah @alaa.q.al.saady' },
+    { username: 's.al.khalef', text: 'قطر 0/2 @um.layan.alenzy @um.dana.q8 @albzain.q7' },
+    { username: 'falcon.q81', text: 'قطر 0/2 @um.areej.8 @um.rahaf7q @dolphin.803532' },
+    { username: 'noufaaa_90', text: 'قطر 2-0 @joj.o66f @om_rafah_38 @sfr_q88888' },
+    { username: 'jacintha.seq', text: 'قطر 2- 0 @arshadali12ar @dilkush.002 @lamaseq01' },
+    { username: 'om_naif161', text: 'قطر 2\\0 @iboarc____22 @zaid_5u @eid92326' },
+    { username: 'om__shoshooo', text: 'قطر 2/0' },
+    { username: 'entesar_kuw', text: 'قطر 2/0' },
+    { username: 'awasha__83', text: 'قطر 2/0 @ovr109 @aishb00 @purelacquer' },
+    { username: 'umhms66', text: 'قطر 2/0 @omleen466 @omhoor398 @rania76566' },
+    { username: 'omdana2023', text: 'قطر 2/0 @omma_hmd @omrahel304 @tootoo7221' },
+    { username: 'quuuin_120', text: '2/0 قطر' },
+  ],
+}
+
 export const KLARAIG_DRAW = {
   handle: 'klaraig',
   url: 'https://www.instagram.com/p/DdoEZdhs4fB/',
