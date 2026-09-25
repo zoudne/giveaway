@@ -4,8 +4,8 @@ import { EntryTable } from './components/EntryTable.tsx'
 import { ImportPanel } from './components/ImportPanel.tsx'
 import { ScoreBoard } from './components/ScoreBoard.tsx'
 import { armCeremony } from './lib/ceremony.ts'
-import { CONTEST, KLARAIG_DRAW } from './lib/contest.ts'
-import { formatScore, sameScore } from './lib/parse.ts'
+import { CONTEST, KLARAIG_DRAW, QUIDER_DRAW } from './lib/contest.ts'
+import { formatScore, parseScore, sameScore } from './lib/parse.ts'
 import { drawPool, pickWinners, prepareEntries } from './lib/prepare.ts'
 import { loadData, saveData } from './lib/storage.ts'
 import { EMPTY_DATA, type AppData, type RawComment, type Score } from './lib/types.ts'
@@ -118,6 +118,34 @@ export default function App() {
       replacedKeys: [],
     }))
     setNotice(`سحب كلاريج جاهز على ${comments.length} أسماء فقط. النتيجة ١–٠.`)
+  }
+
+  function loadQuiderDraw() {
+    const comments: RawComment[] = QUIDER_DRAW.names.map((entry, order) => ({
+      id: `quider-${entry.username}`,
+      username: entry.username,
+      text: entry.text,
+      order,
+      missingUser: false,
+    }))
+    const overrides: AppData['overrides'] = {}
+    for (const comment of comments) {
+      const score = parseScore(comment.text)
+      if (!score || score.saudi !== 1 || score.kuwait !== 0) overrides[comment.id] = { saudi: 1, kuwait: 0 }
+    }
+    setData((current) => ({
+      ...current,
+      actual: { saudi: 1, kuwait: 0 },
+      handle: QUIDER_DRAW.handle,
+      requiredMentions: 2,
+      commentDeadline: '',
+      comments,
+      excluded: {},
+      overrides,
+      winnerKeys: [],
+      replacedKeys: [],
+    }))
+    setNotice(`سحب قويدر جاهز على ${comments.length} أسماء فقط. النتيجة ١–٠.`)
   }
 
   function drawFresh() {
@@ -281,6 +309,7 @@ export default function App() {
           }
           onComments={setComments}
           onKlaraigDraw={loadKlaraigDraw}
+          onQuiderDraw={loadQuiderDraw}
           onNotice={setNotice}
         />
       </div>

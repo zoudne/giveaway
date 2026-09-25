@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { CONTEST, KLARAIG_DRAW, POSTS } from '../lib/contest.ts'
+import { CONTEST, KLARAIG_DRAW, POSTS, QUIDER_DRAW } from '../lib/contest.ts'
 import { assignOrder } from '../lib/importComments.ts'
 import { SAMPLE_COMMENTS } from '../lib/sample.ts'
 import type { RawComment } from '../lib/types.ts'
@@ -38,6 +38,7 @@ type Props = {
   onWinnerCount: (value: number) => void
   onComments: (comments: RawComment[], mode: 'replace' | 'append') => void
   onKlaraigDraw: () => void
+  onQuiderDraw: () => void
   onNotice: (message: string) => void
 }
 
@@ -53,6 +54,7 @@ export function ImportPanel({
   onWinnerCount,
   onComments,
   onKlaraigDraw,
+  onQuiderDraw,
   onNotice,
 }: Props) {
   const [url, setUrl] = useState(CONTEST.postUrl)
@@ -139,6 +141,9 @@ export function ImportPanel({
         ))}
         <button type="button" className="chip" data-testid="klaraig-shortlist" onClick={onKlaraigDraw}>
           سحب كلاريج · {KLARAIG_DRAW.names.length}
+        </button>
+        <button type="button" className="chip" data-testid="quider-shortlist" onClick={onQuiderDraw}>
+          سحب قويدر · {QUIDER_DRAW.names.length}
         </button>
       </div>
       <form
