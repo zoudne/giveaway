@@ -161,19 +161,24 @@ export default function App() {
       const score = parseScore(comment.text)
       if (!score || score.saudi !== 1 || score.kuwait !== 0) overrides[comment.id] = { saudi: 1, kuwait: 0 }
     }
+    const excluded: AppData['excluded'] = {}
+    for (const entry of QUIDER_DRAW.names) {
+      if (entry.out) excluded[`user:${entry.username.toLowerCase()}`] = true
+    }
+    const ready = comments.length - Object.keys(excluded).length
     setData((current) => ({
       ...current,
       actual: { saudi: 1, kuwait: 0 },
       handle: QUIDER_DRAW.handle,
-      requiredMentions: 2,
+      requiredMentions: 0,
       commentDeadline: '',
       comments,
-      excluded: {},
+      excluded,
       overrides,
       winnerKeys: [],
       replacedKeys: [],
     }))
-    setNotice(`سحب قويدر جاهز على ${comments.length} أسماء فقط. النتيجة ١–٠.`)
+    setNotice(`سحب قويدر جاهز على ${ready} اسمًا. استُبعد @alotaibi7582 و@ww.2299gb لأنهما غير متابعين. النتيجة ١–٠.`)
   }
 
   function drawFresh() {

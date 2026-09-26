@@ -17,11 +17,11 @@ type Props = {
   onDone: () => void
 }
 
-function labelFit(count: number): { maxChars: number; fontSize: number; y: number } {
-  if (count <= 8) return { maxChars: 12, fontSize: 16, y: 72 }
-  if (count <= 16) return { maxChars: 10, fontSize: 12, y: 68 }
-  if (count <= 24) return { maxChars: 8, fontSize: 9, y: 62 }
-  return { maxChars: 6, fontSize: 7, y: 54 }
+function markOffset(count: number): number {
+  if (count <= 8) return 72
+  if (count <= 16) return 68
+  if (count <= 24) return 62
+  return 54
 }
 
 function shortName(name: string, maxChars: number): string {
@@ -63,6 +63,7 @@ export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props)
   const [rotation, setRotation] = useState(0)
   const [duration, setDuration] = useState(0)
   const [revealed, setRevealed] = useState<string[]>([])
+  const [spotlight, setSpotlight] = useState<number | null>(null)
   const [live, setLive] = useState(false)
   const soundOn = useRef(sound)
   useEffect(() => {
@@ -82,12 +83,14 @@ export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props)
     void (async () => {
       const landed: string[] = []
       setRevealed([])
+      setSpotlight(null)
       onProgress([])
       setLive(true)
       if (soundOn.current && !reduced) playSpin()
       for (const winner of sequence) {
         if (cancelled) return
         const built = buildSlices(pool.length > 0 ? pool : sequence, winner)
+        setSpotlight(null)
         setSlices(built.slices)
         await sleep(50)
         if (cancelled) return
@@ -102,6 +105,7 @@ export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props)
         await sleep(turn + 90)
         if (cancelled) return
         landed.push(winner)
+        setSpotlight(built.index)
         setRevealed([...landed])
         onProgress([...landed])
         if (soundOn.current && !reduced) playReveal()
@@ -120,7 +124,7 @@ export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props)
 
   const shown = request.id === 0 ? idle : slices
   const count = Math.max(shown.length, 1)
-  const fit = labelFit(count)
+  const markY = markOffset(count)
 
   return (
     <div className="wheel-wrap">
@@ -147,22 +151,24 @@ export function PrizeWheel({ names, request, sound, onProgress, onDone }: Props)
               const angle = (index + 0.5) * (360 / count)
               const turns = ((angle % 360) + 360) % 360
               const flip = turns >= 180
+              const visible = spotlight === index
+              const y = visible ? 78 : markY
               return (
-                <g key={`${name}-${index}`}>
+                <g key={`${index}-${visible ? name : 'mark'}`}>
                   <path d={slicePath(index, count)} fill={COLORS[index % COLORS.length]} />
                   <g transform={`rotate(${angle} 160 160)`}>
                     <text
                       x="160"
-                      y={fit.y}
+                      y={y}
                       textAnchor="middle"
                       direction="ltr"
                       fill={ink}
-                      fontSize={fit.fontSize}
+                      fontSize={visible ? 14 : 11}
                       fontWeight="700"
                       fontFamily="IBM Plex Sans, Segoe UI, Tahoma, sans-serif"
-                      transform={flip ? `rotate(90 160 ${fit.y})` : `rotate(-90 160 ${fit.y})`}
+                      transform={flip ? `rotate(90 160 ${y})` : `rotate(-90 160 ${y})`}
                     >
-                      {shortName(name, fit.maxChars)}
+                      {visible ? shortName(name, 12) : '●'}
                     </text>
                   </g>
                 </g>

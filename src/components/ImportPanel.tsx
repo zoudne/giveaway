@@ -148,7 +148,7 @@ export function ImportPanel({
           سحب كلاريج · {KLARAIG_DRAW.names.length}
         </button>
         <button type="button" className="chip" data-testid="quider-shortlist" onClick={onQuiderDraw}>
-          سحب قويدر · {QUIDER_DRAW.names.length}
+          سحب قويدر · {QUIDER_DRAW.names.filter((entry) => !entry.out).length}
         </button>
       </div>
       <form
