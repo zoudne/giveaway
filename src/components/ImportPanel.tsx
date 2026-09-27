@@ -232,17 +232,20 @@ export function ImportPanel({
       <p className="hint">منشن حساب المسابقة لا يُحسب ضمن العدد المطلوب. يظهر عدد المشاركين الآن: {commentCount}.</p>
       </div>
 
-      <div className="settings-row" hidden>
+      <div className="settings-row">
         <label>
           عدد الفائزين
-          <input
+          <select
             data-testid="winner-count"
-            type="number"
-            min={1}
-            max={20}
             value={winnerCount}
-            onChange={(event) => onWinnerCount(Math.min(20, Math.max(1, Number(event.target.value) || 1)))}
-          />
+            onChange={(event) => onWinnerCount(Number(event.target.value))}
+          >
+            {Array.from({ length: 20 }, (_, index) => index + 1).map((count) => (
+              <option key={count} value={count}>
+                {count}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
 

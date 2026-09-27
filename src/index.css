@@ -284,7 +284,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 .score-sep { font-size: 2rem; color: var(--gold-2); padding-bottom: 28px; }
 .form-error { color: var(--red); margin-top: 8px; }
 .settings-row, .link-form, .manual-form { margin-top: 14px; }
-.settings-row input, .link-form input, .manual-form input, .filters input, .inline-edit input, .scope input, .bulk-form textarea {
+.settings-row input, .settings-row select, .link-form input, .manual-form input, .filters input, .inline-edit input, .scope input, .bulk-form textarea {
   border: 1px solid var(--line);
   background: #08140d;
   border-radius: 14px;
@@ -303,10 +303,13 @@ button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 }
 .link-form input, .manual-form input { direction: ltr; text-align: left; }
 .link-form label, .settings-row label, .manual-form input { flex: 1; min-width: 0; }
-.link-form input, .settings-row input, .manual-form input, .filters input, .score-row input {
+.link-form input, .settings-row input, .settings-row select, .manual-form input, .filters input, .score-row input {
   width: 100%;
   min-width: 0;
   max-width: 100%;
+}
+.settings-row select {
+  cursor: pointer;
 }
 .help { margin-top: 14px; color: var(--muted); }
 .help summary { cursor: pointer; color: var(--gold-2); }
