@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { NameReel } from './NameReel.tsx'
 import { Confetti } from './Confetti.tsx'
 import { announcement } from '../lib/announce.ts'
-import { formatScore } from '../lib/parse.ts'
 import type { ViewEntry } from '../lib/prepare.ts'
 import type { AppData } from '../lib/types.ts'
 
@@ -116,17 +115,6 @@ export function DrawPanel({
                 <div>
                   <span className="ticket-index">{rankTitle(index)}</span>
                   <strong dir="ltr">{winner.comment.missingUser ? 'بدون اسم' : `@${winner.comment.username}`}</strong>
-                  <p>
-                    توقعه{' '}
-                    {winner.prediction ? <bdi dir="ltr">{formatScore(winner.prediction)}</bdi> : 'غير مقروء'}
-                    {data.actual ? (
-                      <>
-                        {' '}
-                        · النتيجة <bdi dir="ltr">{formatScore(data.actual)}</bdi>
-                      </>
-                    ) : null}
-                  </p>
-                  <em className="stamp">مطابق</em>
                   {!winner.rulesMet ? <em className="stamp muted-stamp">خرج من الشروط</em> : null}
                 </div>
               </article>
