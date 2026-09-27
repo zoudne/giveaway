@@ -40,6 +40,7 @@ type Props = {
   onArtcakeDraw: () => void
   onKlaraigDraw: () => void
   onQuiderDraw: () => void
+  onBulkNames: (usernames: string[]) => void
   onNotice: (message: string) => void
 }
 
@@ -57,12 +58,14 @@ export function ImportPanel({
   onArtcakeDraw,
   onKlaraigDraw,
   onQuiderDraw,
+  onBulkNames,
   onNotice,
 }: Props) {
   const [url, setUrl] = useState(CONTEST.postUrl)
   const [loading, setLoading] = useState(false)
   const [manualUser, setManualUser] = useState('')
   const [manualText, setManualText] = useState('')
+  const [bulkNames, setBulkNames] = useState('')
 
   async function fetchUrl(nextUrl: string) {
     const target = nextUrl.trim()
@@ -104,6 +107,26 @@ export function ImportPanel({
     }
   }
 
+  function addBulk(event: FormEvent) {
+    event.preventDefault()
+    const seen = new Set<string>()
+    const usernames: string[] = []
+    for (const part of bulkNames.split(/[\s,،;]+/)) {
+      const name = part.trim().replace(/^@+/, '').replace(/\.+$/g, '')
+      if (!/^[A-Za-z0-9._]{1,30}$/.test(name)) continue
+      const key = name.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      usernames.push(name)
+    }
+    if (usernames.length === 0) {
+      onNotice('الصق أسماء المستخدمين، اسمًا في كل سطر.')
+      return
+    }
+    onBulkNames(usernames)
+    setBulkNames('')
+  }
+
   function addManual(event: FormEvent) {
     event.preventDefault()
     const body = manualText.trim()
@@ -126,6 +149,7 @@ export function ImportPanel({
 
   return (
     <section className="panel">
+      <div hidden>
       <div className="section-kicker">الإعداد</div>
       <h2>اجلب تعليقات المنشور</h2>
       <p className="hint">اختر المنشور أو الصق رابطًا آخر. التعليق بعد آخر موعد لا يدخل السحب.</p>
@@ -204,6 +228,11 @@ export function ImportPanel({
             onChange={(event) => onDeadline(event.target.value ? new Date(event.target.value).toISOString() : '')}
           />
         </label>
+      </div>
+      <p className="hint">منشن حساب المسابقة لا يُحسب ضمن العدد المطلوب. يظهر عدد المشاركين الآن: {commentCount}.</p>
+      </div>
+
+      <div className="settings-row" hidden>
         <label>
           عدد الفائزين
           <input
@@ -216,7 +245,25 @@ export function ImportPanel({
           />
         </label>
       </div>
-      <p className="hint">منشن حساب المسابقة لا يُحسب ضمن العدد المطلوب. يظهر عدد المشاركين الآن: {commentCount}.</p>
+
+      <form className="bulk-form" onSubmit={addBulk}>
+        <label>
+          أسماء دفعة واحدة
+          <textarea
+            data-testid="bulk-usernames"
+            value={bulkNames}
+            dir="ltr"
+            spellCheck={false}
+            rows={8}
+            placeholder={'@name\nname2'}
+            onChange={(event) => setBulkNames(event.target.value)}
+          />
+        </label>
+        <button data-testid="bulk-apply" type="submit">
+          استخدم هذه الأسماء
+        </button>
+      </form>
+      <p className="hint">اسم في كل سطر. هذه الأسماء تحل محل القائمة الحالية وتدخل السحب مباشرة.</p>
 
       <details className="help">
         <summary>إضافة مشارك يدويًا</summary>

@@ -70,9 +70,16 @@ export default function App() {
     setData((current) => {
       const unchanged =
         current.actual === null ? next === null : next !== null && sameScore(current.actual, next)
+      const overrides = { ...current.overrides }
+      for (const comment of current.comments) {
+        if (!comment.id.startsWith('bulk-')) continue
+        if (next) overrides[comment.id] = next
+        else delete overrides[comment.id]
+      }
       return {
         ...current,
         actual: next,
+        overrides,
         winnerKeys: unchanged ? current.winnerKeys : [],
         replacedKeys: unchanged ? current.replacedKeys : [],
       }
@@ -181,6 +188,33 @@ export default function App() {
     setNotice(`سحب قويدر جاهز على ${ready} اسمًا. استُبعد @alotaibi7582 و@ww.2299gb لأنهما غير متابعين. النتيجة ١–٠.`)
   }
 
+  function loadBulkNames(usernames: string[]) {
+    setData((current) => {
+      const actual = current.actual ?? { saudi: 1, kuwait: 0 }
+      const comments: RawComment[] = usernames.map((username, order) => ({
+        id: `bulk-${username.toLowerCase()}`,
+        username,
+        text: `${actual.saudi}-${actual.kuwait}`,
+        order,
+        missingUser: false,
+      }))
+      const overrides: AppData['overrides'] = {}
+      for (const comment of comments) overrides[comment.id] = actual
+      return {
+        ...current,
+        actual,
+        requiredMentions: 0,
+        commentDeadline: '',
+        comments,
+        excluded: {},
+        overrides,
+        winnerKeys: [],
+        replacedKeys: [],
+      }
+    })
+    setNotice(`القائمة الآن ${usernames.length} اسمًا، وكلهم داخل السحب.`)
+  }
+
   function drawFresh() {
     if (spinning || eligible.length === 0) return
     if (sound) armCeremony()
@@ -248,7 +282,7 @@ export default function App() {
     {
       label: 'السحب',
       done: winners.length > 0,
-      detail: winners.length > 0 ? `${winners.length} فائزين` : 'القرص',
+      detail: winners.length > 0 ? `${winners.length} فائزين` : 'الأسماء',
     },
   ]
 
@@ -286,13 +320,13 @@ export default function App() {
         <p className="prize-pill">
           {data.winnerCount} فائزين
         </p>
-        <h1>
+        <h1 hidden>
           <span>{CONTEST.home}</span>
           <span className="vs">×</span>
           <span>{CONTEST.away}</span>
         </h1>
-        <p className="lede">
-          يفوز من طابق النتيجة وكتب منشن {data.requiredMentions} أشخاص. كل توقع مختلف يخرج من القرص تلقائيًا.
+        <p className="lede" hidden>
+          يفوز من طابق النتيجة وكتب منشن {data.requiredMentions} أشخاص. كل توقع مختلف يخرج من السحب تلقائيًا.
         </p>
       </header>
 
@@ -316,12 +350,14 @@ export default function App() {
         ))}
       </ol>
 
-      <ScoreBoard
-        key={data.actual ? `${data.actual.saudi}-${data.actual.kuwait}` : 'empty'}
-        actual={data.actual}
-        correctCount={correctCount}
-        onSave={saveActual}
-      />
+      <div hidden>
+        <ScoreBoard
+          key={data.actual ? `${data.actual.saudi}-${data.actual.kuwait}` : 'empty'}
+          actual={data.actual}
+          correctCount={correctCount}
+          onSave={saveActual}
+        />
+      </div>
 
       <div className="no-print operator control-room">
         <ImportPanel
@@ -344,6 +380,7 @@ export default function App() {
           onArtcakeDraw={loadArtcakeDraw}
           onKlaraigDraw={loadKlaraigDraw}
           onQuiderDraw={loadQuiderDraw}
+          onBulkNames={loadBulkNames}
           onNotice={setNotice}
         />
       </div>

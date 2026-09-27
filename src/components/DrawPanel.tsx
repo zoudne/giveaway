@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { PrizeWheel } from './PrizeWheel.tsx'
+import { NameReel } from './NameReel.tsx'
 import { Confetti } from './Confetti.tsx'
 import { announcement } from '../lib/announce.ts'
 import { formatScore } from '../lib/parse.ts'
@@ -77,7 +77,7 @@ export function DrawPanel({
         {data.winnerCount} فائزين
       </h2>
       <div className="draw-layout">
-        <PrizeWheel names={poolNames} request={spinRequest} sound={sound} onProgress={onProgress} onDone={onSpinDone} />
+        <NameReel names={poolNames} request={spinRequest} sound={sound} onProgress={onProgress} onDone={onSpinDone} />
         <div className="draw-side">
       <button data-testid="draw-button" type="button" className={`draw-btn no-print${spinning ? ' is-hot' : ''}`} disabled={spinning || poolCount === 0} onClick={onDraw}>
         {spinning ? 'السحب جارٍ' : waitingForScore ? 'احفظ النتيجة أولًا' : poolCount === 0 ? 'بانتظار المشاركين' : winners.length > 0 ? `إعادة السحب · ${Math.min(data.winnerCount, poolCount)} من ${poolCount}` : `ابدأ السحب · ${Math.min(data.winnerCount, poolCount)} من ${poolCount}`}
@@ -99,7 +99,7 @@ export function DrawPanel({
               <article key={index} className={`ticket${name ? ' is-in' : ' is-wait'}`}>
                 <span className="ticket-index">{rankTitle(index)}</span>
                 <strong dir="ltr">{name ?? '…'}</strong>
-                <p>{name ? 'توقف القرص' : 'في الانتظار'}</p>
+                <p>{name ? 'توقف الاختيار' : 'في الانتظار'}</p>
               </article>
             )
           })}
@@ -156,7 +156,7 @@ export function DrawPanel({
 
       {!spinning && winners.length === 0 ? (
         <div className="podium-empty">
-          <p>أسماء الفائزين تظهر هنا، واحدًا بعد الآخر، لحظة توقف القرص.</p>
+          <p>أسماء الفائزين تظهر هنا، واحدًا بعد الآخر، لحظة توقف الأسماء.</p>
         </div>
       ) : null}
         </div>
