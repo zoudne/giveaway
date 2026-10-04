@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { ARTCAKE_DRAW, CONTEST, KLARAIG_DRAW, POSTS, QUIDER_DRAW } from '../lib/contest.ts'
+import { parseBulkUsernames } from '../lib/bulkNames.ts'
 import { assignOrder } from '../lib/importComments.ts'
 import { SAMPLE_COMMENTS } from '../lib/sample.ts'
 import type { RawComment } from '../lib/types.ts'
@@ -109,16 +110,7 @@ export function ImportPanel({
 
   function addBulk(event: FormEvent) {
     event.preventDefault()
-    const seen = new Set<string>()
-    const usernames: string[] = []
-    for (const part of bulkNames.split(/[\s,،;]+/)) {
-      const name = part.trim().replace(/^@+/, '').replace(/\.+$/g, '')
-      if (!/^[A-Za-z0-9._]{1,30}$/.test(name)) continue
-      const key = name.toLowerCase()
-      if (seen.has(key)) continue
-      seen.add(key)
-      usernames.push(name)
-    }
+    const usernames = parseBulkUsernames(bulkNames)
     if (usernames.length === 0) {
       onNotice('الصق أسماء المستخدمين، اسمًا في كل سطر.')
       return
@@ -240,7 +232,10 @@ export function ImportPanel({
             value={winnerCount}
             onChange={(event) => onWinnerCount(Number(event.target.value))}
           >
-            {Array.from({ length: 20 }, (_, index) => index + 1).map((count) => (
+            {Array.from(
+              { length: Math.max(100, commentCount, winnerCount) },
+              (_, index) => index + 1,
+            ).map((count) => (
               <option key={count} value={count}>
                 {count}
               </option>
@@ -266,7 +261,7 @@ export function ImportPanel({
           استخدم هذه الأسماء
         </button>
       </form>
-      <p className="hint">اسم في كل سطر. هذه الأسماء تحل محل القائمة الحالية وتدخل السحب مباشرة.</p>
+      <p className="hint">اسم في كل سطر بلا حد أقصى. هذه الأسماء تحل محل القائمة الحالية وتدخل السحب مباشرة.</p>
 
       <details className="help">
         <summary>إضافة مشارك يدويًا</summary>

@@ -16,7 +16,7 @@ export function EntryTable({ entries, onExclude, onOverride }: Props) {
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
   const [editing, setEditing] = useState<string | null>(null)
-  const pageSize = 20
+  const pageSize = 500
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
