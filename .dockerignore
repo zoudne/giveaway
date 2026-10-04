@@ -1,0 +1,15 @@
+.git
+.gitignore
+.cursor
+node_modules
+dist
+dist-ssr
+stories
+*.mp4
+*.webm
+*.mov
+*.log
+npm-debug.log*
+.DS_Store
+agent-transcripts
+scripts/deadline-check.json

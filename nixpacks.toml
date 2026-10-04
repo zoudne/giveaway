@@ -1,10 +1,11 @@
-# Coolify's Nixpacks image installs Node 22.11, and npm ci skips Vite's
-# Linux binding. Reinstall with optional packages, then serve the preview app.
+# Keep the Coolify image small enough to export. Chromium/Playwright browsers
+# are not needed for the bulk-username giveaway flow and were blowing the
+# Docker layer export (~1.7GB unpack + disk pressure → exit 255).
 [phases.setup]
-nixPkgs = ["nodejs_22", "chromium"]
+nixPkgs = ["nodejs_22"]
 
 [phases.install]
-cmds = ["NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm install --include=dev --include=optional"]
+cmds = ["PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm install --include=dev --include=optional"]
 
 [phases.build]
 cmds = ["NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm run build"]
